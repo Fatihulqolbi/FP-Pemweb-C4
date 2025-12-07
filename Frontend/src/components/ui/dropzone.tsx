@@ -105,8 +105,8 @@ export default function Dropzone({
 
   return (
     <div className="w-full space-y-2">
-      <Label className="font-medium flex items-center gap-1">
-        {label} {required && <span className="text-red-500">*</span>}
+      <Label className="font-mono text-purple-300 text-sm tracking-wide flex items-center gap-1">
+        {label} {required && <span className="text-cyan-400">*</span>}
       </Label>
 
       <FileUpload.Root
@@ -117,15 +117,19 @@ export default function Dropzone({
         className="w-full"
       >
         {!preview && (
-          <FileUpload.Dropzone className="p-6 border rounded-xl flex flex-col items-center text-center gap-2">
-            <Upload className="size-6 text-muted-foreground" />
-            <div className="text-sm font-medium">Drag or click to upload</div>
-            <div className="text-xs text-muted-foreground">
+          <FileUpload.Dropzone className="p-6 border-2 border-dashed border-cyan-500/30 rounded-xl flex flex-col items-center text-center gap-2 bg-gray-900/30 hover:border-purple-500/50 hover:bg-gray-900/50 transition-all duration-300">
+            <Upload className="size-6 text-cyan-400" style={{ filter: 'drop-shadow(0 0 10px rgba(6, 182, 212, 0.5))' }} />
+            <div className="text-sm font-mono text-purple-300 tracking-wide">Drag or click to upload</div>
+            <div className="text-xs text-gray-400 font-mono">
               Max {Math.round(maxSize / 1024 / 1024)}MB — Allowed:{" "}
               {allowedTypes.map((t) => t.split("/")[1]).join(", ")}
             </div>
             <FileUpload.Trigger asChild>
-              <Button size="sm" variant="outline">
+              <Button 
+                size="sm" 
+                className="bg-purple-600/20 border border-purple-500/50 text-purple-300 hover:bg-purple-500/30 hover:text-cyan-300 font-mono transition-all duration-300"
+                style={{ boxShadow: '0 0 15px rgba(168, 85, 247, 0.3)' }}
+              >
                 Choose File
               </Button>
             </FileUpload.Trigger>
@@ -133,9 +137,9 @@ export default function Dropzone({
         )}
 
         {preview && !file && (
-          <div className="flex items-center gap-3 p-2 border rounded-md mt-2">
+          <div className="flex items-center gap-3 p-2 border-2 border-cyan-500/30 rounded-md mt-2 bg-gray-900/30 backdrop-blur-sm">
             <div
-              className="size-16 rounded-md overflow-hidden cursor-pointer"
+              className="size-16 rounded-md overflow-hidden cursor-pointer border border-purple-500/30 hover:border-cyan-500/50 transition-all duration-300"
               onClick={() => setLightboxOpen(true)}
             >
               <img
@@ -145,9 +149,14 @@ export default function Dropzone({
               />
             </div>
 
-            <div className="flex-1 text-sm truncate">{preview}</div>
+            <div className="flex-1 text-sm truncate text-cyan-300 font-mono">{preview}</div>
 
-            <Button size="icon" variant="ghost" onClick={handleDelete}>
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              onClick={handleDelete}
+              className="text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/30 hover:border-red-400/50"
+            >
               <X className="size-4" />
             </Button>
           </div>
@@ -157,10 +166,10 @@ export default function Dropzone({
           <FileUpload.List className="mt-2">
             <FileUpload.Item
               value={file}
-              className="flex items-center gap-3 p-2 border rounded-md"
+              className="flex items-center gap-3 p-2 border-2 border-cyan-500/30 rounded-md bg-gray-900/30 backdrop-blur-sm"
             >
               <FileUpload.ItemPreview
-                className="size-16 rounded-md overflow-hidden cursor-pointer"
+                className="size-16 rounded-md overflow-hidden cursor-pointer border border-purple-500/30 hover:border-cyan-500/50 transition-all duration-300"
                 onClick={() => setLightboxOpen(true)}
               >
                 <img
@@ -170,10 +179,15 @@ export default function Dropzone({
                 />
               </FileUpload.ItemPreview>
 
-              <div className="flex-1 text-sm truncate">{file?.name}</div>
+              <div className="flex-1 text-sm truncate text-cyan-300 font-mono">{file?.name}</div>
 
               <FileUpload.ItemDelete asChild>
-                <Button size="icon" variant="ghost" onClick={handleDelete}>
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  onClick={handleDelete}
+                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/30 hover:border-red-400/50"
+                >
                   <X className="size-4" />
                 </Button>
               </FileUpload.ItemDelete>
@@ -182,7 +196,7 @@ export default function Dropzone({
         )}
       </FileUpload.Root>
 
-      {error && <p className="text-red-500 text-xs">{error}</p>}
+      {error && <p className="text-red-400 text-xs font-mono tracking-wide">&gt; {error}</p>}
 
       {lightboxOpen && preview && (
         <Lightbox

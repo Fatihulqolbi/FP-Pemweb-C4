@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { Typography } from "@/components/ui/typography";
 import { ArrowLeft, Pause, Play, Timer, Lock } from "lucide-react";
 import thumbnailPlaceholder from "../../assets/images/thumbnail-placeholder.png";
+import AudioControls from "@/components/ui/audio-controls";
 
 interface Item {
   id: string;
@@ -44,10 +45,10 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
   useEffect(() => {
     const messages = [
       "Initializing System...",
-      "Loading Neural Grid...",
-      "Accessing Host Databanks...",
-      "Decrypting Protocol...",
-      "Syncing Matrix...",
+      "Loading Game Data...",
+      "Preparing Game Session...",
+      "Loading Game Rules...",
+      "Starting Game...",
     ];
 
     let msgIndex = 0;
@@ -242,6 +243,18 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           0% { transform: translateY(0); }
           100% { transform: translateY(50px); }
         }
+        @keyframes slideInGlow {
+          0% { 
+            opacity: 0;
+            transform: translateY(20px);
+            box-shadow: none;
+          }
+          100% { 
+            opacity: 1;
+            transform: translateY(0);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+          }
+        }
         @keyframes scan {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }
@@ -249,6 +262,52 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
         @keyframes shine {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }
+        }
+        @keyframes glow {
+          0%, 100% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.5), 0 0 40px rgba(6, 182, 212, 0.3), 0 0 60px rgba(6, 182, 212, 0.1); }
+          50% { box-shadow: 0 0 30px rgba(168, 85, 247, 0.5), 0 0 60px rgba(168, 85, 247, 0.3), 0 0 90px rgba(168, 85, 247, 0.1); }
+        }
+        @keyframes textGlow {
+          0%, 100% { text-shadow: 0 0 20px rgba(6, 182, 212, 0.8), 0 0 40px rgba(6, 182, 212, 0.5); }
+          50% { text-shadow: 0 0 20px rgba(168, 85, 247, 0.8), 0 0 40px rgba(168, 85, 247, 0.5); }
+        }
+        @keyframes pulsatingLight {
+          0%, 100% { 
+            opacity: 0.3;
+            transform: scale(0.9);
+            box-shadow: 
+              0 0 80px rgba(6, 182, 212, 0.4),
+              0 0 160px rgba(6, 182, 212, 0.2),
+              0 0 240px rgba(168, 85, 247, 0.15),
+              inset 0 0 60px rgba(6, 182, 212, 0.1);
+          }
+          25% {
+            opacity: 0.6;
+            transform: scale(1.05);
+            box-shadow: 
+              0 0 120px rgba(168, 85, 247, 0.5),
+              0 0 200px rgba(168, 85, 247, 0.3),
+              0 0 300px rgba(6, 182, 212, 0.2),
+              inset 0 0 80px rgba(168, 85, 247, 0.15);
+          }
+          50% { 
+            opacity: 0.8;
+            transform: scale(1.15);
+            box-shadow: 
+              0 0 150px rgba(236, 72, 153, 0.6),
+              0 0 250px rgba(236, 72, 153, 0.4),
+              0 0 350px rgba(168, 85, 247, 0.25),
+              inset 0 0 100px rgba(236, 72, 153, 0.2);
+          }
+          75% {
+            opacity: 0.6;
+            transform: scale(1.05);
+            box-shadow: 
+              0 0 120px rgba(168, 85, 247, 0.5),
+              0 0 200px rgba(168, 85, 247, 0.3),
+              0 0 300px rgba(6, 182, 212, 0.2),
+              inset 0 0 80px rgba(168, 85, 247, 0.15);
+          }
         }
         .perspective-1000 {
           perspective: 1000px;
@@ -288,31 +347,59 @@ function LevelSelection({ onSelectLevel }: { onSelectLevel: (gameId: string) => 
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-900 via-purple-900 to-blue-900 p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8 relative overflow-hidden">
+      {/* Animated background grid */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'linear-gradient(cyan 1px, transparent 1px), linear-gradient(90deg, cyan 1px, transparent 1px)',
+          backgroundSize: '50px 50px',
+          animation: 'gridMove 20s linear infinite'
+        }} />
+      </div>
+      
+      {/* Floating particles */}
+      <div className="absolute inset-0 opacity-20">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-cyan-500"
+            style={{
+              width: `${Math.random() * 4 + 2}px`,
+              height: `${Math.random() * 4 + 2}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float ${Math.random() * 10 + 5}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 5}s`,
+            }}
+          />
+        ))}
+      </div>
+      
+      <div className="max-w-6xl mx-auto space-y-8 relative z-10">
         <div className="text-center space-y-4">
           <Typography 
             variant="h1" 
-            className="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-purple-600 font-mono text-4xl tracking-wider"
+            className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600 font-mono text-4xl tracking-wider animate-pulse"
+            style={{ textShadow: '0 0 30px rgba(6,182,212,0.5)' }}
           >
-            PILIH LEVEL
+            &gt; PILIH LEVEL
           </Typography>
-          <Typography variant="p" className="text-blue-300">
-            Pilih tantangan yang sesuai dengan kemampuanmu. Setiap level menawarkan
+          <Typography variant="p" className="text-cyan-300 font-mono text-sm tracking-wide">
+            &gt; Pilih tantangan yang sesuai dengan kemampuanmu. Setiap level menawarkan
             pengalaman unik dengan item dan kategori yang berbeda.
           </Typography>
         </div>
 
         {games.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-32 h-32 mx-auto mb-6 border-4 border-dashed border-gray-600 rounded-lg flex items-center justify-center">
-              <Lock size={48} className="text-gray-600" />
+            <div className="w-32 h-32 mx-auto mb-6 border-4 border-dashed border-cyan-500/30 rounded-lg flex items-center justify-center bg-black/20 backdrop-blur-sm animate-pulse">
+              <Lock size={48} className="text-cyan-500/50" />
             </div>
-            <Typography variant="h3" className="text-gray-500 mb-2">
-              Belum Ada Game
+            <Typography variant="h3" className="text-cyan-400 mb-2 font-mono">
+              &gt; Belum Ada Game
             </Typography>
-            <Typography variant="p" className="text-gray-600">
-              Belum ada Group Sort game yang tersedia saat ini.
+            <Typography variant="p" className="text-cyan-300/70 font-mono text-sm">
+              &gt; Belum ada Group Sort game yang tersedia saat ini.
             </Typography>
           </div>
         ) : (
@@ -320,9 +407,15 @@ function LevelSelection({ onSelectLevel }: { onSelectLevel: (gameId: string) => 
             {games.map((game) => (
               <div
                 key={game.id}
-                className="relative rounded-lg overflow-hidden border-2 border-cyan-500 hover:border-purple-500 cursor-pointer hover:scale-105 transition-all bg-gray-900/50 backdrop-blur-sm"
+                className="group relative rounded-lg overflow-hidden border-2 border-cyan-500/50 hover:border-purple-500 cursor-pointer hover:scale-105 transition-all duration-300 bg-black/30 backdrop-blur-sm"
                 onClick={() => onSelectLevel(game.id)}
+                style={{
+                  boxShadow: '0 0 20px rgba(6,182,212,0.2), inset 0 0 20px rgba(6,182,212,0.1)'
+                }}
               >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-cyan-500/20 group-hover:via-purple-500/10 group-hover:to-pink-500/20 transition-all duration-300 z-10" />
+                
                 <div className="relative h-48 overflow-hidden">
                   <img
                     src={
@@ -331,27 +424,34 @@ function LevelSelection({ onSelectLevel }: { onSelectLevel: (gameId: string) => 
                         : thumbnailPlaceholder
                     }
                     alt={game.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-linear-to-t from-gray-900 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  
+                  {/* Corner accents */}
+                  <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-cyan-400 opacity-70" />
+                  <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-purple-400 opacity-70" />
+                  <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-purple-400 opacity-70" />
+                  <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-pink-400 opacity-70" />
                 </div>
 
-                <div className="p-6 space-y-3">
+                <div className="p-6 space-y-3 relative z-20">
                   <Typography 
                     variant="h3" 
-                    className="text-cyan-300 font-mono text-lg tracking-wide"
+                    className="text-cyan-300 font-mono text-lg tracking-wide group-hover:text-cyan-200 transition-colors"
+                    style={{ textShadow: '0 0 10px rgba(6,182,212,0.5)' }}
                   >
-                    {game.name}
+                    &gt; {game.name}
                   </Typography>
-                  <Typography variant="p" className="text-gray-400 text-sm line-clamp-2">
+                  <Typography variant="p" className="text-cyan-200/70 text-sm line-clamp-2 font-mono">
                     {game.description}
                   </Typography>
                   <div className="flex items-center justify-between pt-2">
                     <span className="text-xs text-purple-400 font-mono">
-                      BY: {game.creator_name || "Unknown"}
+                      &gt; BY: {game.creator_name || "Unknown"}
                     </span>
-                    <span className="text-xs px-3 py-1 rounded-full font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500">
-                      PLAY
+                    <span className="text-xs px-3 py-1 rounded-full font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500 group-hover:bg-cyan-500/30 group-hover:shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-300">
+                      PLAY &gt;
                     </span>
                   </div>
                 </div>
@@ -360,6 +460,9 @@ function LevelSelection({ onSelectLevel }: { onSelectLevel: (gameId: string) => 
           </div>
         )}
       </div>
+      
+      {/* Audio Controls */}
+      <AudioControls />
     </div>
   );
 }
@@ -367,6 +470,37 @@ function LevelSelection({ onSelectLevel }: { onSelectLevel: (gameId: string) => 
 function GroupSort() {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  // Add overscroll control to body
+  useEffect(() => {
+    const originalBodyOverscroll = document.body.style.overscrollBehavior;
+    const originalHtmlOverscroll = document.documentElement.style.overscrollBehavior;
+    const originalBodyOverflow = document.body.style.overflowY;
+    const originalHtmlOverflow = document.documentElement.style.overflowY;
+    
+    // Prevent overscroll behavior
+    document.body.style.overscrollBehavior = 'none';
+    document.documentElement.style.overscrollBehavior = 'none';
+    document.body.style.overscrollBehaviorY = 'none';
+    document.documentElement.style.overscrollBehaviorY = 'none';
+    
+    // Set fixed height to prevent extra scrollable area
+    document.body.style.height = '100%';
+    document.documentElement.style.height = '100%';
+    document.body.style.overflowX = 'hidden';
+    
+    return () => {
+      document.body.style.overscrollBehavior = originalBodyOverscroll;
+      document.documentElement.style.overscrollBehavior = originalHtmlOverscroll;
+      document.body.style.overflowY = originalBodyOverflow;
+      document.documentElement.style.overflowY = originalHtmlOverflow;
+      document.body.style.height = '';
+      document.documentElement.style.height = '';
+      document.body.style.overflowX = '';
+      document.body.style.overscrollBehaviorY = '';
+      document.documentElement.style.overscrollBehaviorY = '';
+    };
+  }, []);
 
   const [loading, setLoading] = useState(true);
   const [game, setGame] = useState<GroupSortGame | null>(null);
@@ -384,6 +518,7 @@ function GroupSort() {
   const [isPaused, setIsPaused] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameFinished, setGameFinished] = useState(false);
+  const [showTimeUpPopup, setShowTimeUpPopup] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Result state
@@ -464,11 +599,11 @@ function GroupSort() {
 
   // Timer effect
   useEffect(() => {
-    if (gameStarted && !isPaused && !gameFinished && timeLeft > 0) {
+    if (gameStarted && !isPaused && !gameFinished && !showTimeUpPopup && timeLeft > 0) {
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            handleSubmit();
+            setShowTimeUpPopup(true);
             return 0;
           }
           return prev - 1;
@@ -478,8 +613,14 @@ function GroupSort() {
       return () => {
         if (timerRef.current) clearInterval(timerRef.current);
       };
+    } else {
+      // Clear timer when conditions are not met
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     }
-  }, [gameStarted, isPaused, gameFinished]);
+  }, [gameStarted, isPaused, gameFinished, showTimeUpPopup, timeLeft]);
 
   const startGame = () => {
     setShowIntro(false);
@@ -543,11 +684,46 @@ function GroupSort() {
     setDraggedItem(null);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (fromTimeUp = false) => {
+    // Prevent multiple submissions
     if (gameFinished) return;
+    
+    // For manual submission, check if all items are placed
+    if (!fromTimeUp && allItems.length > 0) {
+      toast.error("⚠ TASK INCOMPLETE!\nPlace all items before submitting!", {
+        duration: 3000,
+        style: {
+          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(88, 28, 135, 0.95))',
+          color: '#f87171',
+          border: '2px solid rgba(239, 68, 68, 0.5)',
+          borderRadius: '12px',
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          textShadow: '0 0 10px rgba(239, 68, 68, 0.8)',
+          boxShadow: '0 0 30px rgba(239, 68, 68, 0.3), inset 0 0 20px rgba(239, 68, 68, 0.1)',
+          backdropFilter: 'blur(10px)',
+        },
+        iconTheme: {
+          primary: '#ef4444',
+          secondary: 'rgba(15, 23, 42, 0.95)',
+        }
+      });
+      return;
+    }
 
     setGameFinished(true);
-    setIsPaused(true);
+    
+    // Set pause only for manual submission
+    if (!fromTimeUp) {
+      setIsPaused(true);
+    }
+    
+    // Clear timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
 
     const timeTaken = game!.game_data.timeLimit - timeLeft;
 
@@ -596,7 +772,25 @@ function GroupSort() {
         score,
       });
 
-      toast.success(`Score: ${score} points (${percentage}% correct)`);
+      toast.success(`🎯 MISSION ACCOMPLISHED!\nScore: ${score} points (${percentage}% correct)`, {
+        duration: 4000,
+        style: {
+          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(88, 28, 135, 0.95))',
+          color: '#34d399',
+          border: '2px solid rgba(52, 211, 153, 0.5)',
+          borderRadius: '12px',
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          textShadow: '0 0 10px rgba(52, 211, 153, 0.8)',
+          boxShadow: '0 0 30px rgba(52, 211, 153, 0.3), inset 0 0 20px rgba(52, 211, 153, 0.1)',
+          backdropFilter: 'blur(10px)',
+        },
+        iconTheme: {
+          primary: '#22c55e',
+          secondary: 'rgba(15, 23, 42, 0.95)',
+        }
+      });
     } catch (err: any) {
       console.error("Failed to check answers:", err);
       toast.error(err.response?.data?.message || "Failed to submit answers");
@@ -635,6 +829,11 @@ function GroupSort() {
     } catch (err) {
       console.error("Failed to update play count:", err);
     }
+  };
+
+  const handleViewScore = async () => {
+    setShowTimeUpPopup(false);
+    await handleSubmit(true);
   };
 
   const handleExit = async () => {
@@ -681,7 +880,7 @@ function GroupSort() {
     const { correctItems, totalItems, accuracy } = result;
 
     let message = "MISI SELESAI";
-    let subMessage = "Analisis Neural Grid Selesai";
+    let subMessage = "Task Analysis Complete";
     let rating = "LUAR BIASA!";
 
     if (accuracy === 100) {
@@ -695,50 +894,112 @@ function GroupSort() {
     }
 
     return (
-      <div className="min-h-screen bg-linear-to-br from-gray-900 via-purple-900 to-blue-900 flex items-center justify-center p-4">
-        <div className="max-w-4xl w-full bg-gray-800/50 backdrop-blur-lg border-2 border-purple-500 rounded-lg p-8 space-y-6">
-          <div className="text-center space-y-2">
-            <Typography variant="h1" className="text-purple-400 font-mono text-4xl">
+      <div 
+        className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-16 px-4 pb-32 relative overflow-hidden" 
+        style={{ 
+          minHeight: '100vh',
+          height: 'fit-content',
+          overscrollBehavior: 'none',
+          overscrollBehaviorY: 'none'
+        } as React.CSSProperties}
+      >
+        {/* Animated background grid */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'linear-gradient(cyan 1px, transparent 1px), linear-gradient(90deg, cyan 1px, transparent 1px)',
+            backgroundSize: '50px 50px',
+            animation: 'gridMove 20s linear infinite'
+          }} />
+        </div>
+        
+        {/* Floating particles */}
+        <div className="absolute inset-0 opacity-30">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-cyan-500"
+              style={{
+                width: `${Math.random() * 4 + 2}px`,
+                height: `${Math.random() * 4 + 2}px`,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animation: `float ${Math.random() * 10 + 5}s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 5}s`,
+              }}
+            />
+          ))}
+        </div>
+        
+        <div className="flex items-center justify-center py-16">
+          <div className="max-w-4xl w-full bg-black/50 backdrop-blur-lg border-2 border-cyan-500/70 rounded-lg p-8 space-y-6 relative overflow-hidden" style={{
+          boxShadow: '0 0 50px rgba(6,182,212,0.3), inset 0 0 50px rgba(6,182,212,0.1)'
+        }}>
+          {/* Corner accents */}
+          <div className="absolute top-2 left-2 w-8 h-8 border-t-2 border-l-2 border-cyan-400 opacity-70" />
+          <div className="absolute top-2 right-2 w-8 h-8 border-t-2 border-r-2 border-purple-400 opacity-70" />
+          <div className="absolute bottom-2 left-2 w-8 h-8 border-b-2 border-l-2 border-purple-400 opacity-70" />
+          <div className="absolute bottom-2 right-2 w-8 h-8 border-b-2 border-r-2 border-pink-400 opacity-70" />
+          
+          <div className="text-center space-y-2 relative z-10">
+            <Typography variant="h1" className="text-cyan-400 font-mono text-4xl tracking-wider animate-pulse" style={{
+              textShadow: '0 0 30px rgba(6,182,212,0.8)'
+            }}>
               {message}
             </Typography>
-            <Typography variant="p" className="text-green-400">
-              &gt; {subMessage}
+            <Typography variant="p" className="text-green-400 font-mono">
+              {subMessage}
             </Typography>
           </div>
 
           {/* Statistik Performa */}
-          <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-6">
-            <Typography variant="h3" className="text-center text-gray-300 mb-4">
-              Statistik Performa
+          <div className="bg-black/40 border border-cyan-500/50 rounded-lg p-6 relative overflow-hidden" style={{
+            boxShadow: '0 0 20px rgba(6,182,212,0.2), inset 0 0 20px rgba(6,182,212,0.05)'
+          }}>
+            <Typography variant="h3" className="text-center text-cyan-300 mb-4 font-mono tracking-wider" style={{
+              textShadow: '0 0 15px rgba(6,182,212,0.8)'
+            }}>
+              STATISTIK PERFORMA
             </Typography>
             
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               {/* Benar */}
-              <div className="bg-green-500/10 border border-green-500 rounded-lg p-4 flex items-center gap-4">
-                <div className="bg-green-500 rounded-full w-12 h-12 flex items-center justify-center">
-                  <div className="text-white text-2xl">✓</div>
+              <div className="bg-green-500/10 border border-green-500/70 rounded-lg p-4 flex items-center gap-4 relative overflow-hidden" style={{
+                boxShadow: '0 0 15px rgba(34,197,94,0.3), inset 0 0 10px rgba(34,197,94,0.1)'
+              }}>
+                <div className="bg-green-500 rounded-full w-12 h-12 flex items-center justify-center animate-pulse" style={{
+                  boxShadow: '0 0 20px rgba(34,197,94,0.6)'
+                }}>
+                  <div className="text-white text-2xl font-bold">✓</div>
                 </div>
                 <div className="flex-1">
-                  <Typography variant="h2" className="text-green-400 text-2xl font-bold">
+                  <Typography variant="h2" className="text-green-400 text-2xl font-bold font-mono" style={{
+                    textShadow: '0 0 10px rgba(34,197,94,0.8)'
+                  }}>
                     {correctItems}
                   </Typography>
-                  <Typography variant="small" className="text-green-300 block">
-                    Benar
+                  <Typography variant="small" className="text-green-300 block font-mono">
+                    BENAR
                   </Typography>
                 </div>
               </div>
 
               {/* Salah */}
-              <div className="bg-red-500/10 border border-red-500 rounded-lg p-4 flex items-center gap-4">
-                <div className="bg-red-500 rounded-full w-12 h-12 flex items-center justify-center">
-                  <div className="text-white text-2xl">✗</div>
+              <div className="bg-red-500/10 border border-red-500/70 rounded-lg p-4 flex items-center gap-4 relative overflow-hidden" style={{
+                boxShadow: '0 0 15px rgba(239,68,68,0.3), inset 0 0 10px rgba(239,68,68,0.1)'
+              }}>
+                <div className="bg-red-500 rounded-full w-12 h-12 flex items-center justify-center animate-pulse" style={{
+                  boxShadow: '0 0 20px rgba(239,68,68,0.6)'
+                }}>
+                  <div className="text-white text-2xl font-bold">✗</div>
                 </div>
                 <div className="flex-1">
-                  <Typography variant="h2" className="text-red-400 text-2xl font-bold">
+                  <Typography variant="h2" className="text-red-400 text-2xl font-bold font-mono" style={{
+                    textShadow: '0 0 10px rgba(239,68,68,0.8)'
+                  }}>
                     {totalItems > 0 ? totalItems - correctItems : 0}
                   </Typography>
-                  <Typography variant="small" className="text-red-300 block">
-                    Salah
+                  <Typography variant="small" className="text-red-300 block font-mono">
+                    SALAH
                   </Typography>
                 </div>
               </div>
@@ -747,30 +1008,41 @@ function GroupSort() {
             {/* Progress Bar */}
             <div className="mb-4">
               <div className="flex justify-between items-center mb-2">
-                <Typography variant="small" className="text-gray-400">
-                  Nilai
+                <Typography variant="small" className="text-cyan-400 font-mono">
+                  NILAI
                 </Typography>
-                <Typography variant="small" className="text-white font-bold">
+                <Typography variant="small" className="text-white font-bold font-mono" style={{
+                  textShadow: '0 0 10px rgba(255,255,255,0.8)'
+                }}>
                   {accuracy}%
                 </Typography>
               </div>
-              <div className="h-3 bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-3 bg-gray-700/50 border border-cyan-500/30 rounded-full overflow-hidden relative">
                 <div
-                  className="h-full bg-green-500 transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-green-500 to-cyan-500 transition-all duration-500 relative"
                   style={{ width: `${accuracy}%` }}
-                />
+                >
+                  {/* Shine effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+                </div>
               </div>
             </div>
 
             {/* Performa Score */}
-            <div className="bg-black/30 rounded-lg p-4 flex items-center justify-between">
+            <div className="bg-black/50 border border-yellow-500/50 rounded-lg p-4 flex items-center justify-between" style={{
+              boxShadow: '0 0 20px rgba(234,179,8,0.3), inset 0 0 10px rgba(234,179,8,0.1)'
+            }}>
               <div className="flex items-center gap-3">
-                <div className="text-yellow-400 text-3xl">★</div>
+                <div className="text-yellow-400 text-3xl animate-pulse" style={{
+                  filter: 'drop-shadow(0 0 10px rgba(234,179,8,0.8))'
+                }}>★</div>
                 <div>
-                  <Typography variant="small" className="text-gray-400 block">
-                    Performa
+                  <Typography variant="small" className="text-yellow-300 block font-mono">
+                    PERFORMA
                   </Typography>
-                  <Typography variant="h3" className="text-yellow-400 font-bold">
+                  <Typography variant="h3" className="text-yellow-400 font-bold font-mono" style={{
+                    textShadow: '0 0 15px rgba(234,179,8,0.8)'
+                  }}>
                     {result.score}
                   </Typography>
                 </div>
@@ -780,49 +1052,72 @@ function GroupSort() {
 
           {/* Info Grid */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 text-center">
-              <Typography variant="small" className="text-gray-400 block mb-1">
-                Total Item
+            <div className="bg-black/40 border border-blue-500/50 rounded-lg p-4 text-center" style={{
+              boxShadow: '0 0 15px rgba(59,130,246,0.3), inset 0 0 10px rgba(59,130,246,0.1)'
+            }}>
+              <Typography variant="small" className="text-blue-300 block mb-1 font-mono">
+                TOTAL ITEM
               </Typography>
-              <Typography variant="h3" className="text-blue-400 text-xl font-bold">
+              <Typography variant="h3" className="text-blue-400 text-xl font-bold font-mono" style={{
+                textShadow: '0 0 15px rgba(59,130,246,0.8)'
+              }}>
                 {totalItems || 0}
               </Typography>
             </div>
-            <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 text-center">
-              <Typography variant="small" className="text-gray-400 block mb-1">
-                Total Skor
+            <div className="bg-black/40 border border-purple-500/50 rounded-lg p-4 text-center" style={{
+              boxShadow: '0 0 15px rgba(168,85,247,0.3), inset 0 0 10px rgba(168,85,247,0.1)'
+            }}>
+              <Typography variant="small" className="text-purple-300 block mb-1 font-mono">
+                TOTAL SKOR
               </Typography>
-              <Typography variant="h3" className="text-yellow-400 text-xl font-bold">
+              <Typography variant="h3" className="text-purple-400 text-xl font-bold font-mono" style={{
+                textShadow: '0 0 15px rgba(168,85,247,0.8)'
+              }}>
                 {result.score || 0}
               </Typography>
             </div>
           </div>
 
           {/* Rating */}
-          <div className="text-center p-6 bg-linear-to-r from-purple-500/10 to-blue-500/10 border border-purple-500 rounded-lg">
-            <Typography variant="h2" className="text-purple-400 font-mono text-2xl">
+          <div className="text-center p-6 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/70 rounded-lg relative overflow-hidden mb-8" style={{
+            boxShadow: '0 0 30px rgba(168,85,247,0.4), inset 0 0 20px rgba(168,85,247,0.1)'
+          }}>
+            <Typography variant="h2" className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 font-mono text-2xl tracking-wider animate-pulse" style={{
+              textShadow: '0 0 20px rgba(168,85,247,0.8)'
+            }}>
               {rating}
             </Typography>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 mt-8 mb-16">
             <Button
               variant="outline"
-              className="flex-1 border-blue-500 text-blue-400"
+              className="flex-1 border-cyan-500/70 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400 font-mono tracking-wider transition-all duration-300"
               onClick={() => window.location.reload()}
+              style={{
+                boxShadow: '0 0 15px rgba(6,182,212,0.3)'
+              }}
             >
               <Play className="mr-2" />
-              Main Lagi
+              MAIN LAGI
             </Button>
             <Button
-              className="flex-1 bg-purple-600 hover:bg-purple-700"
+              className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 border-2 border-purple-500/50 hover:border-purple-400 font-mono tracking-wider transition-all duration-300"
               onClick={handleExit}
+              style={{
+                textShadow: '0 0 10px rgba(255,255,255,0.8)',
+                boxShadow: '0 0 20px rgba(168,85,247,0.5)'
+              }}
             >
               <ArrowLeft className="mr-2" />
-              Keluar
+              KELUAR
             </Button>
           </div>
+          </div>
         </div>
+        
+        {/* Audio Controls */}
+        <AudioControls />
       </div>
     );
   }
@@ -835,72 +1130,125 @@ function GroupSort() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-900 via-purple-900 to-blue-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden pt-16">
+      {/* Animated background grid */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'linear-gradient(cyan 1px, transparent 1px), linear-gradient(90deg, cyan 1px, transparent 1px)',
+          backgroundSize: '50px 50px',
+          animation: 'gridMove 20s linear infinite'
+        }} />
+      </div>
+      
+      {/* Floating particles */}
+      <div className="absolute inset-0 opacity-20">
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-cyan-500"
+            style={{
+              width: `${Math.random() * 3 + 1}px`,
+              height: `${Math.random() * 3 + 1}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float ${Math.random() * 15 + 10}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 5}s`,
+            }}
+          />
+        ))}
+      </div>
+      
       {/* Header */}
-      <div className="bg-black/30 backdrop-blur-sm border-b border-purple-500/30">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="fixed top-0 left-0 right-0 bg-black/20 backdrop-blur-md border-b border-cyan-500/40 z-50" style={{
+        boxShadow: '0 2px 15px rgba(0,0,0,0.3), 0 0 20px rgba(6,182,212,0.1)'
+      }}>
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-4 flex items-center justify-between">
           <Button
             variant="ghost"
             onClick={handleExit}
-            className="text-blue-400 hover:text-blue-300"
+            className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 font-mono transition-all duration-300 text-sm sm:text-base"
+            style={{ textShadow: '0 0 10px rgba(6,182,212,0.5)' }}
           >
-            <ArrowLeft className="mr-2" />
-            Exit
+            <ArrowLeft className="mr-1 sm:mr-2" size={16} />
+            <span className="hidden sm:inline">EXIT</span>
+            <span className="sm:hidden">‹</span>
           </Button>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-yellow-400">
-              <Timer size={20} />
-              <span className="font-mono text-xl">{formatTime(timeLeft)}</span>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-1 sm:gap-2 text-cyan-400 bg-black/30 px-2 sm:px-4 py-1 sm:py-2 rounded-lg border border-cyan-500/30" style={{
+              boxShadow: '0 0 15px rgba(6,182,212,0.3), inset 0 0 10px rgba(6,182,212,0.1)'
+            }}>
+              <Timer size={16} className="sm:size-5 animate-pulse" />
+              <span className="font-mono text-sm sm:text-xl tracking-wider" style={{ textShadow: '0 0 10px rgba(6,182,212,0.8)' }}>
+                {formatTime(timeLeft)}
+              </span>
             </div>
 
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsPaused(!isPaused)}
-              className="border-purple-500 text-purple-400"
+              className="border-purple-500/70 text-purple-400 hover:bg-purple-500/10 hover:border-purple-400 transition-all duration-300 font-mono text-xs sm:text-sm px-2 sm:px-3"
+              style={{
+                boxShadow: '0 0 10px rgba(168,85,247,0.3)'
+              }}
             >
-              {isPaused ? <Play size={16} /> : <Pause size={16} />}
+              {isPaused ? <Play size={14} className="sm:size-4" /> : <Pause size={14} className="sm:size-4" />}
+              <span className="ml-1 sm:ml-2 hidden sm:inline">{isPaused ? 'RESUME' : 'PAUSE'}</span>
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+      <div className="max-w-7xl mx-auto p-4 md:p-8 pt-20 space-y-6 relative z-10">
         <div className="text-center space-y-2">
-          <Typography variant="h2" className="text-purple-400 font-mono">
-            {game.name}
+          <Typography variant="h2" className="text-cyan-400 font-mono text-3xl tracking-wider animate-pulse" style={{
+            textShadow: '0 0 20px rgba(6,182,212,0.8)'
+          }}>
+            &gt; {game.name} &lt;
           </Typography>
-          <Typography variant="p" className="text-blue-300">
+          <Typography variant="p" className="text-cyan-300/80 font-mono tracking-wide">
             {game.description}
           </Typography>
         </div>
 
         {/* Items Pool */}
         <div
-          className="bg-black/30 backdrop-blur-sm border-2 border-blue-500 rounded-lg p-4"
+          className="bg-black/40 backdrop-blur-sm border-2 border-cyan-500/70 rounded-lg p-4 min-h-[120px] relative overflow-hidden"
           onDragOver={handleDragOver}
           onDrop={handleDropToPool}
+          style={{
+            boxShadow: '0 0 30px rgba(6,182,212,0.3), inset 0 0 30px rgba(6,182,212,0.1)'
+          }}
         >
-          <Typography variant="small" className="text-blue-400 mb-3 uppercase font-mono">
-            Available Items ({allItems.length})
-          </Typography>
+          {/* Corner accents */}
+          <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-cyan-400 opacity-70" />
+          <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-purple-400 opacity-70" />
+          <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-purple-400 opacity-70" />
+          <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-pink-400 opacity-70" />
+          
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {allItems.map((item) => (
               <div
                 key={item.id}
                 draggable
                 onDragStart={() => handleDragStart(item)}
-                className="bg-yellow-500/20 border-2 border-yellow-500 rounded-lg p-3 cursor-move hover:scale-105 transition-transform text-center"
+                className="group bg-yellow-500/20 border-2 border-yellow-500/70 rounded-lg p-3 cursor-move hover:scale-105 hover:border-yellow-400 transition-all duration-300 text-center relative overflow-hidden"
+                style={{
+                  boxShadow: '0 0 15px rgba(234,179,8,0.3), inset 0 0 10px rgba(234,179,8,0.1)'
+                }}
               >
+                {/* Hover effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/0 to-yellow-500/0 group-hover:from-yellow-500/20 group-hover:to-orange-500/10 transition-all duration-300" />
+                
                 {item.image && (
                   <img
                     src={`${import.meta.env.VITE_API_URL}/${item.image}`}
                     alt={item.text}
-                    className="w-full h-20 object-cover rounded mb-2"
+                    className="w-full h-20 object-cover rounded mb-2 group-hover:scale-110 transition-transform duration-300"
                   />
                 )}
-                <Typography variant="small" className="text-yellow-300 text-xs">
+                <Typography variant="small" className="text-yellow-300 text-xs font-mono relative z-10">
                   {item.text}
                 </Typography>
               </div>
@@ -913,11 +1261,22 @@ function GroupSort() {
           {game.game_data.categories.map((category) => (
             <div
               key={category.id}
-              className="bg-black/30 backdrop-blur-sm border-2 border-purple-500 rounded-lg p-4 min-h-[300px]"
+              className="bg-black/40 backdrop-blur-sm border-2 border-purple-500/70 rounded-lg p-4 min-h-[300px] relative overflow-hidden"
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(category.id)}
+              style={{
+                boxShadow: '0 0 30px rgba(168,85,247,0.3), inset 0 0 30px rgba(168,85,247,0.1)'
+              }}
             >
-              <Typography variant="h4" className="text-purple-400 mb-4 font-mono">
+              {/* Corner accents */}
+              <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-purple-400 opacity-70" />
+              <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-pink-400 opacity-70" />
+              <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-cyan-400 opacity-70" />
+              <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-purple-400 opacity-70" />
+              
+              <Typography variant="h4" className="text-purple-400 mb-4 font-mono tracking-wider text-center" style={{
+                textShadow: '0 0 15px rgba(168,85,247,0.8)'
+              }}>
                 {category.name}
               </Typography>
               <div className="grid grid-cols-2 gap-3">
@@ -926,16 +1285,22 @@ function GroupSort() {
                     key={item.id}
                     draggable
                     onDragStart={() => handleDragStart(item)}
-                    className="bg-green-500/20 border-2 border-green-500 rounded-lg p-3 cursor-move hover:scale-105 transition-transform text-center"
+                    className="group bg-green-500/20 border-2 border-green-500/70 rounded-lg p-3 cursor-move hover:scale-105 hover:border-green-400 transition-all duration-300 text-center relative overflow-hidden"
+                    style={{
+                      boxShadow: '0 0 15px rgba(34,197,94,0.3), inset 0 0 10px rgba(34,197,94,0.1)'
+                    }}
                   >
+                    {/* Hover effect */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-500/0 to-green-500/0 group-hover:from-green-500/20 group-hover:to-emerald-500/10 transition-all duration-300" />
+                    
                     {item.image && (
                       <img
                         src={`${import.meta.env.VITE_API_URL}/${item.image}`}
                         alt={item.text}
-                        className="w-full h-20 object-cover rounded mb-2"
+                        className="w-full h-20 object-cover rounded mb-2 group-hover:scale-110 transition-transform duration-300"
                       />
                     )}
-                    <Typography variant="small" className="text-green-300 text-xs">
+                    <Typography variant="small" className="text-green-300 text-xs font-mono relative z-10">
                       {item.text}
                     </Typography>
                   </div>
@@ -948,38 +1313,102 @@ function GroupSort() {
         {/* Submit Button */}
         <div className="text-center">
           <Button
-            onClick={handleSubmit}
-            disabled={allItems.length > 0}
-            className="bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-6 text-lg"
+            onClick={() => handleSubmit()}
+            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-6 text-lg font-mono tracking-wider border-2 border-purple-500/50 hover:border-purple-400 transition-all duration-300 relative overflow-hidden group"
+            style={{
+              textShadow: '0 0 10px rgba(255,255,255,0.8)',
+              boxShadow: '0 0 30px rgba(168,85,247,0.6), inset 0 0 20px rgba(168,85,247,0.1)'
+            }}
           >
-            Submit Answers
+            {/* Shine effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full transition-transform duration-1000 -translate-x-full" />
+            SUBMIT ANSWERS
           </Button>
-          {allItems.length > 0 && (
-            <Typography variant="small" className="text-yellow-400 mt-2">
-              Place all items before submitting
-            </Typography>
-          )}
         </div>
       </div>
 
       {/* Pause Overlay */}
       {isPaused && !gameFinished && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gray-800/90 border-2 border-purple-500 rounded-lg p-8 text-center space-y-4">
-            <Pause size={64} className="mx-auto text-purple-400" />
-            <Typography variant="h2" className="text-purple-400 font-mono">
-              GAME PAUSED
-            </Typography>
-            <Button
-              onClick={() => setIsPaused(false)}
-              className="bg-purple-600 hover:bg-purple-700"
-            >
-              <Play className="mr-2" />
-              Resume
-            </Button>
+          <div className="bg-black/90 border-2 border-purple-500 rounded-lg px-12 py-10 text-center relative overflow-hidden min-w-[320px]" style={{
+            boxShadow: '0 0 50px rgba(168,85,247,0.5), inset 0 0 30px rgba(168,85,247,0.1)'
+          }}>
+            {/* Corner accents */}
+            <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-purple-400 opacity-70" />
+            <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-cyan-400 opacity-70" />
+            <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-cyan-400 opacity-70" />
+            <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-purple-400 opacity-70" />
+            
+            {/* Content dengan spacing yang konsisten */}
+            <div className="flex flex-col items-center justify-center space-y-5">
+              <Pause size={48} className="text-purple-400 animate-pulse" style={{
+                filter: 'drop-shadow(0 0 20px rgba(168,85,247,0.8))'
+              }} />
+              <Typography variant="h2" className="text-purple-400 font-mono tracking-wider" style={{
+                textShadow: '0 0 20px rgba(168,85,247,0.8)'
+              }}>
+                GAME PAUSED
+              </Typography>
+              <Button
+                onClick={() => setIsPaused(false)}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 font-mono tracking-wider border-2 border-purple-500/50 hover:border-purple-400 transition-all duration-300 px-6 py-3"
+                style={{
+                  textShadow: '0 0 10px rgba(255,255,255,0.8)',
+                  boxShadow: '0 0 20px rgba(168,85,247,0.5)'
+                }}
+              >
+                <Play className="mr-2" size={18} />
+                RESUME
+              </Button>
+            </div>
           </div>
         </div>
       )}
+      
+      {/* Time Up Popup */}
+      {showTimeUpPopup && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="bg-black/95 border-2 border-amber-500 rounded-lg px-12 py-10 text-center relative overflow-hidden min-w-[320px]" style={{
+            boxShadow: '0 0 50px rgba(245, 158, 11, 0.5), inset 0 0 30px rgba(245, 158, 11, 0.1)'
+          }}>
+            {/* Corner accents */}
+            <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-amber-400 opacity-70" />
+            <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-orange-400 opacity-70" />
+            <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-orange-400 opacity-70" />
+            <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-amber-400 opacity-70" />
+            
+            {/* Content */}
+            <div className="flex flex-col items-center justify-center space-y-5">
+              <Timer size={48} className="text-amber-400 animate-pulse" style={{
+                filter: 'drop-shadow(0 0 20px rgba(245, 158, 11, 0.8))'
+              }} />
+              <Typography variant="h2" className="text-amber-400 font-mono tracking-wider" style={{
+                textShadow: '0 0 20px rgba(245, 158, 11, 0.8)'
+              }}>
+                TIME'S UP!
+              </Typography>
+              <div className="text-amber-300/80 font-mono text-center max-w-xs space-y-2" style={{
+                textShadow: '0 0 10px rgba(245, 158, 11, 0.5)'
+              }}>
+                <Typography variant="p">Game finished with current placement. Ready to see your results?</Typography>
+              </div>
+              <Button
+                onClick={handleViewScore}
+                className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 font-mono tracking-wider border-2 border-amber-500/50 hover:border-amber-400 transition-all duration-300 px-6 py-3"
+                style={{
+                  textShadow: '0 0 10px rgba(255,255,255,0.8)',
+                  boxShadow: '0 0 20px rgba(245, 158, 11, 0.5)'
+                }}
+              >
+                VIEW SCORE
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Audio Controls */}
+      <AudioControls />
     </div>
   );
 }
