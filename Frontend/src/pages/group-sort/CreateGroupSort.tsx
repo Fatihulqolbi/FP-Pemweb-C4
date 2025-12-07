@@ -201,21 +201,22 @@ function CreateGroupSort() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 relative overflow-x-hidden overflow-y-auto" style={{ overscrollBehavior: 'none', scrollBehavior: 'smooth' }}>
       {/* Fixed full-screen background */}
       <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900" />
       
-      {/* Animated grid background */}
+      {/* Animated grid background - optimized with GPU acceleration */}
       <div className="fixed inset-0 opacity-5 pointer-events-none overflow-hidden">
         <div className="absolute inset-0 w-full h-full" style={{
           backgroundImage: 'linear-gradient(cyan 1px, transparent 1px), linear-gradient(90deg, cyan 1px, transparent 1px)',
           backgroundSize: '50px 50px',
           animation: 'gridMove 20s linear infinite',
-          willChange: 'transform'
+          willChange: 'transform',
+          transform: 'translateZ(0)' // GPU acceleration
         }} />
       </div>
 
-      {/* Floating particles */}
+      {/* Floating particles - optimized */}
       <div className="fixed inset-0 opacity-20 pointer-events-none overflow-hidden">
         <div className="absolute inset-0 w-full h-full">
           {[...Array(20)].map((_, i) => (
@@ -229,21 +230,22 @@ function CreateGroupSort() {
                 top: `${Math.random() * 95}%`,
                 animation: `float ${Math.random() * 10 + 5}s ease-in-out infinite`,
                 animationDelay: `${Math.random() * 5}s`,
-                willChange: 'transform'
+                willChange: 'transform',
+                transform: 'translateZ(0)' // GPU acceleration
               }}
             />
           ))}
         </div>
       </div>
 
-      {/* Header */}
-      <div className="sticky top-0 z-50 bg-gray-800/20 backdrop-blur-md border-b border-cyan-500/30">
+      {/* Header - Fixed Sticky Navbar */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gray-800/40 backdrop-blur-sm border-b border-cyan-500/30" style={{ willChange: 'auto' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
               onClick={() => navigate("/create-projects")}
-              className="flex items-center gap-2 text-cyan-400 hover:text-purple-400 hover:bg-cyan-500/10 border border-cyan-500/30 hover:border-purple-500/50 transition-all duration-300"
+              className="flex items-center gap-2 text-cyan-400 hover:text-purple-400 hover:bg-cyan-500/10 border border-cyan-500/30 hover:border-purple-500/50 transition-all duration-300 backdrop-blur-sm"
             >
               <ArrowLeft size={20} />
               <span className="hidden sm:inline font-mono">Back</span>
@@ -260,27 +262,33 @@ function CreateGroupSort() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="relative z-10 max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 pt-8 pb-20">
-        {/* Pulsating Light Background */}
+      {/* Background Effects Layer - Completely Isolated */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        {/* Pulsating Light Background - isolated in fixed layer */}
         <div 
-          className="absolute inset-0 rounded-lg bg-gradient-to-br from-cyan-400/20 via-purple-500/25 to-pink-500/20 pointer-events-none"
+          className="absolute left-1/2 top-1/2 w-full max-w-4xl h-full rounded-lg bg-gradient-to-br from-cyan-400/20 via-purple-500/25 to-pink-500/20"
           style={{
             animation: 'pulsatingLight 4s ease-in-out infinite',
             filter: 'blur(25px)',
-            zIndex: -1
+            transform: 'translate(-50%, -50%) translateZ(0)',
+            willChange: 'opacity'
           }}
         ></div>
         
-        {/* Secondary pulsating layer for more depth */}
+        {/* Secondary pulsating layer - isolated in fixed layer */}
         <div 
-          className="absolute inset-4 rounded-lg bg-gradient-to-tl from-purple-600/15 via-cyan-400/20 to-pink-400/15 pointer-events-none"
+          className="absolute left-1/2 top-1/2 w-full max-w-4xl h-full rounded-lg bg-gradient-to-tl from-purple-600/15 via-cyan-400/20 to-pink-400/15"
           style={{
             animation: 'pulsatingLight 4s ease-in-out infinite 1s',
             filter: 'blur(15px)',
-            zIndex: -1
+            transform: 'translate(-50%, -50%) translateZ(0)',
+            willChange: 'opacity'
           }}
         ></div>
+      </div>
+
+      {/* Main Content - Completely Separate */}
+      <div className="relative z-10 max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 pt-24 pb-20" style={{ marginTop: '80px' }}>
         
         <div className="bg-gray-800/50 backdrop-blur-lg border-2 border-purple-500/50 rounded-lg p-6 space-y-6 shadow-2xl relative" style={{
           boxShadow: '0 0 50px rgba(168, 85, 247, 0.3), inset 0 0 50px rgba(6, 182, 212, 0.1)'
