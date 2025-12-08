@@ -1,6 +1,8 @@
 import { type Prisma, type ROLE } from '@prisma/client';
 import { StatusCodes } from 'http-status-codes';
 import { v4 } from 'uuid';
+import { unlink } from 'node:fs/promises';
+import path from 'node:path';
 
 import { ErrorResponse, type IGroupSortJson, prisma } from '@/common';
 import { FileManager } from '@/utils';
@@ -146,7 +148,7 @@ export abstract class GroupSortService {
   ) {
     const game = await prisma.games.findUnique({
       where: { id: game_id },
-      select: { creator_id: true, game_json: true },
+      select: { creator_id: true, game_json: true, thumbnail_image: true },
     });
 
     if (!game)
@@ -163,6 +165,20 @@ export abstract class GroupSortService {
 
     let thumbnailImagePath: string | undefined;
     if (data.thumbnail_image) {
+      // Delete old thumbnail if exists
+      if (game.thumbnail_image) {
+        try {
+          const uploadsDir = path.join(process.cwd(), '..', 'uploads');
+          const oldImagePath = path.join(uploadsDir, game.thumbnail_image);
+          await unlink(oldImagePath);
+          console.log('Old thumbnail deleted:', oldImagePath);
+        } catch (err) {
+          console.error('Failed to delete old thumbnail:', err);
+          // Continue anyway, don't fail the update
+        }
+      }
+
+      // Upload new thumbnail
       thumbnailImagePath = await FileManager.upload(
         `game/group-sort/${game_id}`,
         data.thumbnail_image,
@@ -172,6 +188,16 @@ export abstract class GroupSortService {
     let updatedGameJson: IGroupSortJson | undefined;
     if (data.categories) {
       const gameJson = game.game_json as unknown as IGroupSortJson;
+
+      // Collect all old image paths that should be deleted
+      const oldImagePaths = new Set<string>();
+      gameJson.categories.forEach((cat) => {
+        cat.items.forEach((item) => {
+          if (item.item_image) {
+            oldImagePaths.add(item.item_image);
+          }
+        });
+      });
 
       let itemWithImageAmount = 0;
       for (const category of data.categories) {
@@ -192,6 +218,8 @@ export abstract class GroupSortService {
         );
 
       const imageArray: string[] = [];
+      const usedOldImages = new Set<string>();
+
       if (data.files_to_upload) {
         for (const image of data.files_to_upload) {
           const newImagePath = await FileManager.upload(
@@ -220,6 +248,32 @@ export abstract class GroupSortService {
           })),
         })),
       };
+
+      // Delete old images that are no longer used
+      const newImagePaths = new Set<string>();
+      updatedGameJson.categories.forEach((cat) => {
+        cat.items.forEach((item) => {
+          if (item.item_image) {
+            newImagePaths.add(item.item_image);
+          }
+        });
+      });
+
+      const imagesToDelete = Array.from(oldImagePaths).filter(
+        (img) => !newImagePaths.has(img),
+      );
+
+      for (const imagePath of imagesToDelete) {
+        try {
+          const uploadsDir = path.join(process.cwd(), '..', 'uploads');
+          const fullPath = path.join(uploadsDir, imagePath);
+          await unlink(fullPath);
+          console.log('Old item image deleted:', fullPath);
+        } catch (err) {
+          console.error('Failed to delete old item image:', err);
+          // Continue anyway, don't fail the update
+        }
+      }
     }
 
     const updatedGame = await prisma.games.update({
