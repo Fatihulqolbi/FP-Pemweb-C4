@@ -234,16 +234,6 @@ if (scoreData && typeof scoreData === 'object' && 'score' in scoreData) {
                   </div>
                 </div>
 
-                {/* Highest Score Display */}
-                {project.highestScore !== undefined && (
-                  <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-100 to-orange-100 p-2 rounded">
-                    <Trophy className="w-4 h-4 text-yellow-600" />
-                    <Typography variant="small" className="text-yellow-800 font-semibold">
-                      Highest Score: {project.highestScore}
-                    </Typography>
-                  </div>
-                )}
-
                 {/* Hints Display */}
                 {project.hints && project.hints.length > 0 && (
                   <div className="bg-blue-50 p-2 rounded">
